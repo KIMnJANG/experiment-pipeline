@@ -66,7 +66,7 @@ jobs:
 
       - name: Set new image tag
         run: |
-          cd deployments/overlays/dev
+          cd deployments/experiment/overlays/dev
           kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/train-mnist:${{ env.RELEASE_VERSION }}
           kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/slack-alert:${{ env.RELEASE_VERSION }}
           kustomize edit set namesuffix -- -${{env.SUFFIX}}
