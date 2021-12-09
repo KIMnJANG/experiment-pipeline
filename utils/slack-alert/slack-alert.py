@@ -7,7 +7,7 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_name", default="katib-experiment-0028")
-    parser.add_argument("--namespace", default="mnist-exp")
+    parser.add_argument("--namespace", default="ep")
 
     args = parser.parse_args()
     return args
