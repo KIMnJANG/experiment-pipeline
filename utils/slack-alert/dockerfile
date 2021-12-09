@@ -1,4 +1,4 @@
-FROM gcr.io/deeplearning-platform-release/tf2-gpu.2-6
+FROM python:3.8-alpine
 
 ARG SLACK_WEBHOOK_ARG
 ENV SLACK_WEBHOOK=${SLACK_WEBHOOK_ARG}
