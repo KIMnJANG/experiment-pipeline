@@ -1,3 +1,5 @@
 resources:
   - katib-experiment.yaml
   - slack-alert.yaml
+  - gateway-deployment.yaml
+  - gateway-service.yaml
