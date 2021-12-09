@@ -50,7 +50,7 @@ spec:
                 effect: "NoSchedule"
             containers:
               - name: training-container
-                image: ghcr.io/ssuwani/train-mnist:0.0.1
+                image: ghcr.io/kimnjang/train-mnist:0.0.1
                 command:
                   - "python"
                   - "/src/train.py"

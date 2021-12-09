@@ -56,8 +56,8 @@ jobs:
       - name: Alert Build and push
         uses: docker/build-push-action@v2
         with:
-          context: utils
-          file: ./utils/dockerfile
+          context: utils/slack-alert
+          file: ./utils/slack-alert/dockerfile
           push: true
           tags: ghcr.io/${{ env.OWNER_LC}}/slack-alert:${{ env.RELEASE_VERSION}}
           build-args: SLACK_WEBHOOK_ARG=${{ secrets.SLACK_WEBHOOK }}

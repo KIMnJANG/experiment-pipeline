@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-gateways
+spec:
+  selector:
+    matchLabels:
+      run: mlops-gateways
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: mlops-gateways
+    spec:
+      containers:
+      - name: mlops-gateways
+        image: ssuwani/mlops-gateways:latest
+        ports:
+        - containerPort: 5000

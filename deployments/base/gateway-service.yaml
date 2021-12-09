@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlops-gateways
+  labels:
+    run: mlops-gateways
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+  selector:
+    run: mlops-gateways
+  type: LoadBalancer
