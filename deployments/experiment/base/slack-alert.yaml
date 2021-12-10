@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: slack-alert
-          image: ghcr.io/kimnjang/slack-alert:0.0.1
+          image: ssuwani/slack-alert:v0.1
           command:
             - "python"
             - "/src/slack-alert.py"

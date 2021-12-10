@@ -53,14 +53,14 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.OWNER_LC}}/train-mnist:${{ env.RELEASE_VERSION}}
 
-      - name: Alert Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: utils/slack-alert
-          file: ./utils/slack-alert/dockerfile
-          push: true
-          tags: ghcr.io/${{ env.OWNER_LC}}/slack-alert:${{ env.RELEASE_VERSION}}
-          build-args: SLACK_WEBHOOK_ARG=${{ secrets.SLACK_WEBHOOK }}
+      # - name: Alert Build and push
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: utils/slack-alert
+      #     file: ./utils/slack-alert/dockerfile
+      #     push: true
+      #     tags: ghcr.io/${{ env.OWNER_LC}}/slack-alert:${{ env.RELEASE_VERSION}}
+      #     build-args: SLACK_WEBHOOK_ARG=${{ secrets.SLACK_WEBHOOK }}
       - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v1
 
@@ -68,7 +68,6 @@ jobs:
         run: |
           cd deployments/experiment/overlays/dev
           kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/train-mnist:${{ env.RELEASE_VERSION }}
-          kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/slack-alert:${{ env.RELEASE_VERSION }}
           kustomize edit set namesuffix -- -${{env.SUFFIX}}
           git config --global user.name ${{ github.repository_owner }}
           git config --global user.email "jsuwan961205@gmail.com"
