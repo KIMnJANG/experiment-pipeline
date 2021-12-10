@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: mlops-gateways
-        image: ssuwani/mlops-gateways:latest
+        image: ssuwani/mlops-gateways:v0.1
         ports:
         - containerPort: 5000

@@ -3,12 +3,12 @@ import requests
 import json
 
 
-TOKEN = os.environ.get("GITHUB_TOKEN")
+TOKEN = "<GITHUB ACCESS TOKEN>"
 OWNER = "KIMnJANG"
-REPO = "mlops_mnist"
+REPO = "mnist-model"
 
+WORKFLOW_ID = "deploy.yml"
 headers = {
-    "Accept": "application/vnd.github.v3+json",
     "Authorization": f"token {TOKEN}",
 }
 
@@ -16,12 +16,18 @@ headers = {
 def call_dispatcher(hpo):
     units = hpo["hidden_units"]
     optimizer = hpo["optimizer"]
-    data = {"ref": "main", "inputs": {"units": units, "optimizer": optimizer}}
-
+    print(units, optimizer)
+    data = {"ref": "main", "inputs": {"units": str(units), "optimizer": optimizer}}
+    # data = {"ref": "main", "inputs":{"model_path": model_path, "model_tag": model_tag }}
     res = requests.post(
-        f"https://api.github.com/repos/{OWNER}/{REPO}/dispatches",
-        data=json.dumps(data),
+        f"https://api.github.com/repos/{OWNER}/{REPO}/actions/workflows/{WORKFLOW_ID}/dispatches",
         headers=headers,
+        data=json.dumps(data),
     )
     print(res.text)
     print(res.status_code)
+
+
+if __name__ == "__main__":
+    hpo = {"hidden_units": 64, "optimizer": "adam"}
+    call_dispatcher(hpo)
