@@ -21,7 +21,7 @@ def call_dispatcher(data):
     data_json = {
         "ref": "main",
         "inputs": {
-            "hidden_units": str(units),
+            "units": str(units),
             "optimizer": optimizer,
             "version": version,
         },
