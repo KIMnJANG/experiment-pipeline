@@ -3,7 +3,7 @@ kind: Kustomization
 nameSuffix: "-035"
 images:
 - name: ghcr.io/kimnjang/slack-alert
-  newTag: 0.1.1
+  newTag: 0.1.2
 - name: ghcr.io/kimnjang/train-mnist
   newTag: 0.3.5
   
