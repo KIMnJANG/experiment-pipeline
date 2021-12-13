@@ -19,7 +19,7 @@ def call_dispatcher(data):
     version = data["version"]
     print(units, optimizer, version)
     data_json = {
-        "ref": "master",
+        "ref": "main",
         "inputs": {
             "hidden_units": str(units),
             "optimizer": optimizer,
