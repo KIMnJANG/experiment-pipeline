@@ -1,11 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-nameSuffix: "-042"
+nameSuffix: "-043"
 images:
 - name: ghcr.io/kimnjang/slack-alert
   newTag: 0.1.3
 - name: ghcr.io/kimnjang/train-mnist
-  newTag: 0.4.2
+  newTag: 0.4.3
   
 resources:
 - ../../base
