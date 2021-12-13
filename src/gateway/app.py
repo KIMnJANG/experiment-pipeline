@@ -14,7 +14,7 @@ def run_deploy_pipepline():
     data = {info.split("-")[0]: info.split("-")[1] for info in data.split()}
     print("data: ", data)
     call_dispatcher(data)
-    return f"배포 파이프라인이 실행되었습니다.\n https://github.com/ssuwani/deploy-pipeline/actions\n 실행된 하이퍼 파라미터: {data}"
+    return f"배포 파이프라인이 실행되었습니다.\n https://github.com/kimnjang/deploy-pipeline/actions\n 실행된 하이퍼 파라미터: {data}"
 
 
 if __name__ == "__main__":

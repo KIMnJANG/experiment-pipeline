@@ -4,10 +4,10 @@ import json
 
 
 TOKEN = os.getenv("ACCESS_TOKEN")
-OWNER = "ssuwani"
+OWNER = "kimnjang"
 REPO = "deploy-pipeline"
 
-WORKFLOW_ID = "ci.yml"
+WORKFLOW_ID = "train-for-deploy.yml"
 headers = {
     "Authorization": f"token {TOKEN}",
 }
