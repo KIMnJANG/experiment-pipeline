@@ -14,6 +14,6 @@ spec:
             - "--exp_name"
             - "$(EXPERIMENT_NAME)"
             - "--namespace"
-            - "ep-test"
+            - "ep"
       restartPolicy: Never
   backoffLimit: 4
