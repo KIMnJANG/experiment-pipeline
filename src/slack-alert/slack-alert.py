@@ -28,7 +28,12 @@ def send_message_to_slack(exp_name, namespace):
     exp = client.get_experiment(exp_name, namespace=namespace)
     metrics = exp["status"]["currentOptimalTrial"]["observation"]
     args = exp["status"]["currentOptimalTrial"]["parameterAssignments"]
-
+    result = {}
+    for arg in args:
+        result[arg["name"]] = arg["value"]
+    units = result["hidden_units"]
+    optimizer = result["optimizer"]
+    version = '.'.join(exp_name.split("-")[-1])
     acc = metrics["metrics"][0]["latest"]
     loss = metrics["metrics"][1]["latest"]
     url = os.getenv("SLACK_WEBHOOK")
@@ -60,7 +65,7 @@ def send_message_to_slack(exp_name, namespace):
                 "type": "section",
                 "text": {
                     "type": "plain_text",
-                    "text": "배포 파이프라인을 실행하려면 다음 명령어를 입력하세요\n/run_deploy_pipeline optimizer-{optimizer} hidden_units-{hidden_units}",
+                    "text": f"배포 파이프라인을 실행하려면 다음 명령어를 입력하세요\n/run_deploy_pipeline optimizer-{optimizer} hidden_units-{units} version-{version}",
                     "emoji": True,
                 },
             },
