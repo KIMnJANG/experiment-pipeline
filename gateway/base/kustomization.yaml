@@ -1,0 +1,3 @@
+resources:
+  - gateway-deployment.yaml
+  - gateway-service.yaml

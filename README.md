@@ -1,86 +1,38 @@
-# Katib 를 통해 수행하는 실험 파이프라인
+## Experiment Pipeline
 
-**Diagram**
-
-<img src="images/diagram.png"/>
-
-**순서도**
-
-1. <ins>개발자 `train.py` 를 Github Repository에 Push</ins>
-2. <ins>Github Action을 통해 수행되는 Docker build & push</ins>
-3. <ins>ArgoCD가 바라보고 있는 Deploy Repository Update with tag</ins>
-4. ArgoCD가 Kubernetes에 `train-experiment.yaml` 실행 
-5. Slack Alert
-
-
-
-현재 레포지토리에서 수행하는 Task는 1, 2, 3입니다.
-
-<br/>
-
-## 1. train.py
-
-Katib로 HPO를 수행하기 위해 2가지 신경써야 할 부분이 있습니다.
-
-1. 하이퍼 파라미터 입력
-2. 메트릭 저장을 위한 출력
-
-
-
-**1. 하이퍼 파라미터 입력**
-
-모델 학습을 위한 코드에서 하이퍼 파라미터 튜닝을 원하는 Argument을 `argparse` 를 통해 지정해야합니다.
-
-example)
-
-```python
-import argparser
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--hidden_units", type=int, required=True)
-    parser.add_argument("--optimizer", type=str, required=True)
-
-    args = parser.parse_args()
-    return args
+```bash
+.
+├── .github
+│   └── workflows
+│       └── cd.yml
+├── README.md
+├── experiment
+│   ├── base
+│   │   ├── katib-experiment.yaml
+│   │   ├── kustomization.yaml
+│   │   └── slack-alert.yaml
+│   └── overlays
+│       └── dev
+│           └── kustomization.yaml
+└── gateway
+    ├── gateway-deployment.yaml
+    └── gateway-service.yaml
 ```
 
-**2. 메트릭 저장을 위한 출력**
-
-Katib로 HPO 수행을 위해선 Metrics Collector를 정의해야합니다. 이때 StdOut을 사용할 것입니다. StdOut 방식의 사용법은 간단합니다. 파이썬의 `print` 를 통해 `{key}={value}` 를 맞춰 출력하도록 하면됩니다.
-
-example)
-
-```python
-print(f"model acc={acc:.4f} loss={loss:.4f}")
-```
-
-위의 예시는 acc라는 key값에 acc가 소수점 네번째자리까지의 값이 저장될 것입니다. (loss도 마찬가지)
-
-<br/>
-
-## 2. Github Actions Docker
-
-특정 Commit에 버전을 정의하고자 할 때 Tag를 지정한 뒤 업로드할 수 있습니다. 
-
-Tag가 업로드 되면 Github Actions가 실행됩니다. Github Actions가 자동으로 수행하는 일들은 다음과 같습니다.
-
-1. 현재 레포지토리 복제
-2. 이미 정의된 Dockerfile 기반으로 `train.py` 를 도커 이미지로 빌드
-3. `ghcr`로 도커 이미지 업로드
-
-<br/>
-
-## 3. Github Actions Update Tag
-
-2번과 이어지는 내용이지만 역할이 다르다 판단하며 분리하였습니다. 
-
-도커 이미지가 업로드 되면 Kubernees로의 Deploy를 담당하는 Repogitory의 `train-experiment.yaml` 을 업데이트합니다. 그렇게 되면 ArgoCD가 해당 레포지토리를 바라보고 있으므로 자동으로 Katib를  통해 HPO Experiment가 시작됩니다.
+- `katib-experiment.yaml` <br/>
+    Katib를 통한 Hyper Parameter Tuning을 진행합니다. [mnist-model](https://github.com/Ssuwani/mnist-model)에서 생성한 이미지를 바탕으로 Experiment 리소스를 정의합니다.
+- `base/kustomization.yaml` <br/>
+    kustomize를 통해 오브젝트를 관리할 리소스를 정의합니다.
+- `slack-alert.yaml`<br/>
+    Katib-Experiment의 종료를 모니터링합니다. 실험이 종료되면 Slack을 통해 실험에 관련된 정보를 알립니다.
+- `overlays/dev/kustomization.yaml`<br/>
+    이미지 태그 및 실험명 등, 실험에 관련된 변경 사항들을 관리합니다. 
+- `gateway-deployment.yaml`<br/>
+    slack-alert을 통해 Slack으로 실험관련 정보가 전달될 때 슬랙에서 사용할 수 있는 Slash Command가 함께 전달됩니다. [Slash Command](https://api.slack.com/interactivity/slash-commands)는 Deploy-Pipeline의 Worflow를 실행하기 위함인데 이를 연결해주는 게이트웨이입니다. Flask를 이용해 작성하였습니다.
+- `gateway-service.yaml`<br/>
+    방금 정의한 deployment를 외부로 노출합니다. LoadBalancer Type를 사용해 정의했습니다.
+- `.github/workflows/cd.yml` <br/>[mnist-model](https://github.com/Ssuwani/mnist-model)으로부터 실행되기 위해 Dispatch 방식으로 정의하였습니다. 태그로서 정의된 버전정보를 받아와 `experiment/overlays/dev/kustomization.yaml` 파일을 업데이트합니다. 
 
 
 
-
-
-
-
+현재의 레포지토리는 Experiment와 Gateway 각각의 폴더를 ArgoCD를 통해 배포됩니다. 

@@ -1,5 +1,10 @@
 FROM python:3.8-slim
 
+ENV PYTHONUNBUFFERED=1
+
+ARG ACCESS_TOKEN_ARG
+ENV ACCESS_TOKEN=${ACCESS_TOKEN_ARG}
+
 COPY . /app
 
 RUN pip3 install flask requests

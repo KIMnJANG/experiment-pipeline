@@ -7,11 +7,13 @@ spec:
     spec:
       containers:
         - name: slack-alert
-          image: ssuwani/slack-alert:v0.1
+          image: ghcr.io/kimnjang/slack-alert:0.1.1
           command:
             - "python"
             - "/src/slack-alert.py"
             - "--exp_name"
             - "$(EXPERIMENT_NAME)"
+            - "--namespace"
+            - "ep-test"
       restartPolicy: Never
   backoffLimit: 4

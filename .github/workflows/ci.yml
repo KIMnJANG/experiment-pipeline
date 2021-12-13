@@ -1,33 +1,31 @@
-name: ci
+# Only Dockerize
+name: CI for src
 
 on:
-  push:
+  create:
     tags:
       - "v*"
 jobs:
   image-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           ref: master
+      # tag v0.0.1 -> RELEASE_VERSION = 0.0.1
       - name: Set env
         run: |
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
 
+      # 0.0.1 -> 001
       - name: Find Suffix string
         run: |
           echo "SUFFIX=${VERSION//./}" >> $GITHUB_ENV
         env:
           VERSION: ${{ env.RELEASE_VERSION }}
-      - name: check suffix env
-        run: |
-          echo "version: $VERSION -> suffix: $SUFFIX"
-        env:
-          VERSION: ${{ env.RELEASE_VERSION }}
-          SUFFIX: ${{ env.SUFFIX}}
 
       - name: Set up docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -39,38 +37,43 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.ACCESS_TOKEN }}
 
+      # Ssuwani -> ssuwani for ghcr naming rule
       - name: set lower case owner name
         run: |
           echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
         env:
           OWNER: "${{ github.repository_owner }}"
 
-      - name: Experiment Build and push
+      - name: gateway Build and push
         uses: docker/build-push-action@v2
         with:
-          context: train
-          file: ./train/dockerfile
+          context: src/gateway
+          file: src/gateway/dockerfile
           push: true
-          tags: ghcr.io/${{ env.OWNER_LC}}/train-mnist:${{ env.RELEASE_VERSION}}
+          tags: ghcr.io/${{ env.OWNER_LC}}/mlops-gateways:${{ env.RELEASE_VERSION}}
+          build-args: ACCESS_TOKEN_ARG=${{secrets.ACCESS_TOKEN}}
+          
+      - name: slack alert Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: src/slack-alert
+          file: src/slack-alert/dockerfile
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LC}}/slack-alert:${{ env.RELEASE_VERSION}}
+          build-args: SLACK_WEBHOOK_ARG=${{secrets.SLACK_WEBHOOK}}
 
-      # - name: Alert Build and push
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: utils/slack-alert
-      #     file: ./utils/slack-alert/dockerfile
-      #     push: true
-      #     tags: ghcr.io/${{ env.OWNER_LC}}/slack-alert:${{ env.RELEASE_VERSION}}
-      #     build-args: SLACK_WEBHOOK_ARG=${{ secrets.SLACK_WEBHOOK }}
       - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v1
 
       - name: Set new image tag
         run: |
-          cd deployments/experiment/overlays/dev
-          kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/train-mnist:${{ env.RELEASE_VERSION }}
-          kustomize edit set namesuffix -- -${{env.SUFFIX}}
+          cd experiment/overlays/dev
+          kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/slack-alert:${{ env.RELEASE_VERSION }}
+          cd ../../../gateway/overlays/dev
+          kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/mlops-gateways:${{ env.RELEASE_VERSION }}
           git config --global user.name ${{ github.repository_owner }}
           git config --global user.email "jsuwan961205@gmail.com"
+          cd ../../../
           git add .
           git commit -m 'Publish new version ${{ env.RELEASE_VERSION }} to dev'
           git push -u origin master

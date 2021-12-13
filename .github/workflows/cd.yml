@@ -1,0 +1,44 @@
+name: Experiment Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+    # github.event.inputs.RELEASE_VERSION
+      RELEASE_VERSION:
+        description: 'version define from tag' 
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: echo VERSION
+        run: echo ${{ github.event.inputs.RELEASE_VERSION }}
+      
+      - name: Find Suffix string
+        run: |
+          echo "SUFFIX=${VERSION//./}" >> $GITHUB_ENV
+        env:
+          VERSION: ${{ github.event.inputs.RELEASE_VERSION }}
+
+      - name: set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: "${{ github.repository_owner }}"
+      
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Set new image tag
+        run: |
+          cd experiment/overlays/dev
+          kustomize edit set image ghcr.io/${{ env.OWNER_LC }}/train-mnist:${{ github.event.inputs.RELEASE_VERSION }}
+          kustomize edit set namesuffix -- -${{env.SUFFIX}}
+          git config --global user.name ${{ github.repository_owner }}
+          git config --global user.email "jsuwan961205@gmail.com"
+          git add .
+          git commit -m 'Publish new version ${{ github.event.inputs.RELEASE_VERSION }} to dev'
+          git push -u origin master
