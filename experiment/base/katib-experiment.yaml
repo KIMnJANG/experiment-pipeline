@@ -54,7 +54,7 @@ spec:
                 command:
                   - "python"
                   - "/src/train.py"
-                  - "--hidden_units=${trialParameters.hidden_units}"
+                  - "--units=${trialParameters.hidden_units}"
                   - "--optimizer=${trialParameters.optimizer}"
 
             restartPolicy: Never
